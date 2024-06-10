@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">PasswordManagerAssignment</string>
+
+    <string name="home_title">Password Manager</string>
+</resources>
