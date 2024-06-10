@@ -25,7 +25,7 @@ class LocalDBRepo @Inject constructor(private val accessDao: AccessUserInfo) {
         try {
             val secretKey = GenerateKeyUtils.getSecretKey()
             val userName = SecureAESMechanism.encrypt(acUserName, secretKey)
-            val password = SecureAESMechanism.encrypt(acUserName, secretKey)
+            val password = SecureAESMechanism.encrypt(acPassword, secretKey)
             val userInfo = UserInfo(acName, userName, password)
 
             accessDao.insertUserInfo(userInfo)
@@ -35,7 +35,7 @@ class LocalDBRepo @Inject constructor(private val accessDao: AccessUserInfo) {
     }
 
     @Throws
-    suspend fun getUserInfo(acName: String): Flow<UserInfo> {
+    fun getUserInfo(acName: String): Flow<UserInfo> {
         return accessDao.getUserInfo(acName).map {
             UserInfo(
                 it.acName,
@@ -46,7 +46,7 @@ class LocalDBRepo @Inject constructor(private val accessDao: AccessUserInfo) {
     }
 
     @Throws
-    suspend fun getAllUserInfo(): Flow<List<UserInfo>> {
+    fun getAllUserInfo(): Flow<List<UserInfo>> {
         return accessDao.getAllUserInfo().map { flow ->
             val secretKey = GenerateKeyUtils.getSecretKey()
             flow.map {

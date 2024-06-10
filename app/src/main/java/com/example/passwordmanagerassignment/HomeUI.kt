@@ -1,5 +1,6 @@
 package com.example.passwordmanagerassignment
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,6 +19,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -31,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -129,6 +132,7 @@ fun UserInfoItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddNewAccount(
+    addNewAccountSheetState: SheetState = rememberModalBottomSheetState(),
     addNewACListener: (acName: String, userName: String, passWord: String) -> Unit = { _, _, _ -> }
 ) {
     val textFieldColors = TextFieldDefaults.textFieldColors(
@@ -137,11 +141,13 @@ fun AddNewAccount(
         cursorColor = Color.Black,
         containerColor = Color.Transparent
     )
-    val addNewAccountSheetState = rememberModalBottomSheetState()
 
     var accountName by remember { mutableStateOf("") }
     var userName by remember { mutableStateOf("") }
     var passWord by remember { mutableStateOf("") }
+
+    val userNameError = remember { mutableStateOf(false) }
+    val passWordError = remember { mutableStateOf(false) }
 
     ModalBottomSheet(
         sheetState = addNewAccountSheetState,
@@ -164,29 +170,43 @@ fun AddNewAccount(
             TextField(
                 value = userName, onValueChange = {
                     userName = it
+                    userNameError.value = !isValidEmail(it)
                 }, colors = textFieldColors,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 5.dp, horizontal = 20.dp)
                     .background(color = Color.White, shape = RoundedCornerShape(10.dp))
                     .border(.5.dp, Color.LightGray, RoundedCornerShape(10.dp)),
-                placeholder = { Text(text = "Username / Email") }
+                placeholder = { Text(text = "Username / Email") },
+                isError = userNameError.value
             )
             TextField(
                 value = passWord, onValueChange = {
                     passWord = it
+                    passWordError.value = !isValidPassword(it)
                 }, colors = textFieldColors,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 5.dp, horizontal = 20.dp)
                     .background(color = Color.White, shape = RoundedCornerShape(10.dp))
                     .border(.5.dp, Color.LightGray, RoundedCornerShape(10.dp)),
-                placeholder = { Text(text = "Password") }
+                placeholder = { Text(text = "Password") },
+                isError = passWordError.value
             )
 
+            val context = LocalContext.current
             Button(
                 onClick = {
-                    addNewACListener.invoke(accountName, userName, passWord)
+                    if (!userNameError.value && !passWordError.value) {
+                        addNewACListener.invoke(accountName, userName, passWord)
+                        CoroutineScope(Dispatchers.Main).launch {
+                            addNewAccountSheetState.hide()
+                        }
+                    } else Toast.makeText(
+                        context,
+                        "Pls check your credentials",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -202,11 +222,6 @@ fun AddNewAccount(
 
         }
     }
-
-
-    CoroutineScope(Dispatchers.Main).launch {
-        addNewAccountSheetState.show()
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -215,11 +230,10 @@ fun AccountDetails(
     acName: String = "Facebook",
     userName: String = "Example@gmail.com",
     password: String = "********",
-    editListener: () -> Unit = {},
-    deleteListener: () -> Unit = {}
+    accountDetailsBtmSheetState: SheetState = rememberModalBottomSheetState(),
+    editListener: (acName: String) -> Unit = {},
+    deleteListener: (acName: String) -> Unit = {}
 ) {
-
-    val accountDetailsBtmSheetState = rememberModalBottomSheetState()
 
     ModalBottomSheet(
         sheetState = accountDetailsBtmSheetState,
@@ -280,7 +294,7 @@ fun AccountDetails(
 
             Row {
                 Button(
-                    onClick = { editListener.invoke() },
+                    onClick = { editListener.invoke(acName) },
                     modifier = Modifier
                         .weight(1f)
                         .padding(vertical = 10.dp, horizontal = 8.dp)
@@ -294,7 +308,7 @@ fun AccountDetails(
                     )
                 }
                 Button(
-                    onClick = { deleteListener.invoke() },
+                    onClick = { deleteListener.invoke(acName) },
                     modifier = Modifier
                         .weight(1f)
                         .padding(vertical = 10.dp, horizontal = 8.dp)
@@ -309,10 +323,6 @@ fun AccountDetails(
                 }
             }
         }
-    }
-
-    CoroutineScope(Dispatchers.Main).launch {
-        accountDetailsBtmSheetState.show()
     }
 }
 
