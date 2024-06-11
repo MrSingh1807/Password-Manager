@@ -9,12 +9,17 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,6 +49,15 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun HomeScreen() {
         val addNewAC = rememberModalBottomSheetState()
+        var isAddNeACShow by rememberSaveable {
+            mutableStateOf(false)
+        }
+        val editBtmSheet = rememberModalBottomSheetState()
+        var isEditDialogOpen by rememberSaveable {
+            mutableStateOf(false)
+        }
+
+
         val coroutinesScope = rememberCoroutineScope()
 
         Surface(
@@ -55,17 +69,28 @@ class MainActivity : ComponentActivity() {
 
                 Image(
                     modifier = Modifier
+                        .size(100.dp)
                         .padding(end = 16.dp, bottom = 16.dp)
                         .constrainAs(btmFIB) {
                             end.linkTo(parent.end)
                             bottom.linkTo(parent.bottom)
                         }
-                        .clickable { lifecycleScope.launch { addNewAC.show() } },
+                        .clickable { isAddNeACShow = true },
                     painter = painterResource(id = R.drawable.ic_home_fab),
                     contentDescription = "Floating BTN"
                 )
 
-                AddNewAccount(addNewAccountSheetState = addNewAC)
+                if (isAddNeACShow) {
+                    AddNewAccount(
+                        addNewAccountSheetState = addNewAC,
+                        dismissReq = {
+                            isAddNeACShow = false
+                        })
+                }
+
+                if (isEditDialogOpen) {
+                    AccountDetails(accountDetailsBtmSheetState = editBtmSheet, dismissReq = { isEditDialogOpen = false})
+                }
 
             }
         }

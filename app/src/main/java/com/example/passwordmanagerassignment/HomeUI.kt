@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -29,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,22 +82,25 @@ fun HomeUi(modifier: Modifier = Modifier) {
         )
 
 
-         val dummyList = (1..10).toList()
-         LazyColumn {
-             items(dummyList.size) {
-                 UserInfoItem()
-             }
-         }
+        val dummyList = (1..10).toList()
+        LazyColumn {
+            items(dummyList) {
+                UserInfoItem {
+
+                }
+            }
+        }
 
 
     }
 //    AddNewAccount()
-//        AccountDetails()
+//    AccountDetails()
 }
 
 @Composable
 fun UserInfoItem(
-    acName: String = "Google"
+    acName: String = "Google",
+    clickListener: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -103,6 +109,7 @@ fun UserInfoItem(
             .wrapContentSize()
             .padding(horizontal = 16.dp)
             .clip(CircleShape)
+            .clickable { clickListener.invoke() }
             .background(color = Color.White)
             .border(.5.dp, Color.LightGray, CircleShape),
         verticalAlignment = Alignment.CenterVertically
@@ -131,7 +138,8 @@ fun UserInfoItem(
 @Composable
 fun AddNewAccount(
     btnText: String = "Add New Account",
-    addNewAccountSheetState: SheetState = rememberModalBottomSheetState(),
+    addNewAccountSheetState: SheetState,
+    dismissReq: () -> Unit,
     addNewACListener: (acName: String, userName: String, passWord: String) -> Unit = { _, _, _ -> }
 ) {
     val textFieldColors = TextFieldDefaults.textFieldColors(
@@ -152,7 +160,7 @@ fun AddNewAccount(
         modifier = Modifier.background(color = Color.Transparent),
         sheetState = addNewAccountSheetState,
         containerColor = colorResource(id = R.color.btm_dialog_background),
-        onDismissRequest = { }) {
+        onDismissRequest = { dismissReq.invoke() }) {
         Column(
             modifier = Modifier.wrapContentSize()
         ) {
@@ -231,7 +239,8 @@ fun AccountDetails(
     acName: String = "Facebook",
     userName: String = "Example@gmail.com",
     password: String = "********",
-    accountDetailsBtmSheetState: SheetState = rememberModalBottomSheetState(),
+    dismissReq: () -> Unit,
+    accountDetailsBtmSheetState: SheetState,
     editListener: (acName: String) -> Unit = {},
     deleteListener: (acName: String) -> Unit = {}
 ) {
@@ -239,7 +248,9 @@ fun AccountDetails(
     ModalBottomSheet(
         sheetState = accountDetailsBtmSheetState,
         containerColor = colorResource(id = R.color.btm_dialog_background),
-        onDismissRequest = { }) {
+        onDismissRequest = {
+            dismissReq.invoke()
+        }) {
         Column(
             modifier = Modifier
                 .wrapContentSize()
