@@ -4,47 +4,83 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.lifecycleScope
 import com.example.passwordmanagerassignment.ui.theme.PasswordManagerAssignmentTheme
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private val mViewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             PasswordManagerAssignmentTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                HomeScreen()
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun HomeScreen() {
+        val addNewAC = rememberModalBottomSheetState()
+        val coroutinesScope = rememberCoroutineScope()
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    PasswordManagerAssignmentTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Greeting("Android", modifier = Modifier.padding(innerPadding))
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            ConstraintLayout {
+                val (btmFIB, homeUI) = createRefs()
+                HomeUi()
+
+                Image(
+                    modifier = Modifier
+                        .padding(end = 16.dp, bottom = 16.dp)
+                        .constrainAs(btmFIB) {
+                            end.linkTo(parent.end)
+                            bottom.linkTo(parent.bottom)
+                        }
+                        .clickable { lifecycleScope.launch { addNewAC.show() } },
+                    painter = painterResource(id = R.drawable.ic_home_fab),
+                    contentDescription = "Floating BTN"
+                )
+
+                AddNewAccount(addNewAccountSheetState = addNewAC)
+
+            }
         }
     }
+
+
+    @Preview(showBackground = true)
+    @Composable
+    fun GreetingPreview() {
+        PasswordManagerAssignmentTheme {
+            Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                HomeScreen()
+            }
+        }
+    }
+
 }
 

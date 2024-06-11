@@ -16,6 +16,12 @@ class MainViewModel @Inject constructor(private val repository: LocalDBRepo) : V
 
     private val allUsers = mutableStateOf(emptyList<UserInfo>())
 
+
+    init {
+        getAllUserInfo()
+    }
+
+
     private fun getAllUserInfo() {
         viewModelScope.launch(Dispatchers.IO) {
             repository.getAllUserInfo().collect {

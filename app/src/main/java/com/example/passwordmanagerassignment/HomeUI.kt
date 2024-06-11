@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -42,7 +43,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.passwordmanagerassignment.ui.theme.SF_PRO_BLACK
 import com.example.passwordmanagerassignment.ui.theme.SF_PRO_BOLD
 import com.example.passwordmanagerassignment.ui.theme.SF_PRO_HEAVY
 import com.example.passwordmanagerassignment.ui.theme.SF_PRO_MEDIUM
@@ -51,48 +51,46 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
-object HomeUI {
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeUi(modifier: Modifier = Modifier) {
 
-    @Composable
-    fun MainUI() {
-        Column(
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(vertical = 20.dp)
+    ) {
+        Text(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(vertical = 20.dp)
-        ) {
-            Text(
-                modifier = Modifier
-                    .padding(vertical = 10.dp)
-                    .padding(horizontal = 16.dp),
-                text = stringResource(id = R.string.home_title),
-                style = TextStyle(
-                    fontFamily = SF_PRO_MEDIUM,
-                    fontSize = 18.sp,
-                    color = Color.Black
-                ),
-            )
-            Spacer(
-                modifier = Modifier
-                    .height(1.dp)
-                    .fillMaxWidth()
-                    .background(color = Color.LightGray)
-            )
+                .padding(top = 25.dp)
+                .padding(vertical = 15.dp, horizontal = 16.dp),
+            text = stringResource(id = R.string.home_title),
+            style = TextStyle(
+                fontFamily = SF_PRO_MEDIUM,
+                fontSize = 18.sp,
+                color = Color.Black
+            ),
+        )
+        Spacer(
+            modifier = Modifier
+                .height(1.dp)
+                .fillMaxWidth()
+                .background(color = Color.LightGray)
+        )
 
 
-            /* val dummyList = (1..10).toList()
-             LazyColumn {
-                 items(dummyList) {
-                     UserInfoItem()
-                 }
-             }*/
+         val dummyList = (1..10).toList()
+         LazyColumn {
+             items(dummyList.size) {
+                 UserInfoItem()
+             }
+         }
 
 
-        }
-        AddNewAccount()
-//        AccountDetails()
     }
+//    AddNewAccount()
+//        AccountDetails()
 }
-
 
 @Composable
 fun UserInfoItem(
@@ -132,6 +130,7 @@ fun UserInfoItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddNewAccount(
+    btnText: String = "Add New Account",
     addNewAccountSheetState: SheetState = rememberModalBottomSheetState(),
     addNewACListener: (acName: String, userName: String, passWord: String) -> Unit = { _, _, _ -> }
 ) {
@@ -150,6 +149,7 @@ fun AddNewAccount(
     val passWordError = remember { mutableStateOf(false) }
 
     ModalBottomSheet(
+        modifier = Modifier.background(color = Color.Transparent),
         sheetState = addNewAccountSheetState,
         containerColor = colorResource(id = R.color.btm_dialog_background),
         onDismissRequest = { }) {
@@ -215,13 +215,14 @@ fun AddNewAccount(
                 colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.add_new_btn_color))
             ) {
                 Text(
-                    text = "Add New Account", modifier = Modifier.padding(vertical = 5.dp),
+                    text = btnText, modifier = Modifier.padding(vertical = 5.dp),
                     style = TextStyle(fontFamily = SF_PRO_MEDIUM, color = Color.White)
                 )
             }
 
         }
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -335,13 +336,14 @@ fun ShowPreview() {
             .fillMaxSize()
             .background(colorResource(id = R.color.home_background))
     ) { _ ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(colorResource(id = R.color.home_background))
-        ) {
-            HomeUI.MainUI()
-        }
+        HomeUi()
+//        Column(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .background(colorResource(id = R.color.home_background))
+//        ) {
+//            HomeUi()
+//        }
     }
 
 }

@@ -76,9 +76,13 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
 
+    implementation (libs.androidx.datastore.preferences)
+    implementation (libs.androidx.constraintlayout.compose)
 
 
-    //Dagger
+
+
+            //Dagger
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
 
