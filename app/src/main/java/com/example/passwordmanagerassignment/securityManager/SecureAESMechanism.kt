@@ -1,14 +1,14 @@
 package com.example.passwordmanagerassignment.securityManager
 
+import android.util.Base64
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
-import android.util.Base64
 
 object SecureAESMechanism {
 
-    private const val ALGO = "AES/CBC/PKCS5Padding"
-    private const val IV = "RandomInitVector" // 16 bytes IV
+    private const val ALGO = "AES/CBC/PKCS7Padding"
+    private const val IV = "RandomInitVector"
 
     fun encrypt(value: String, key: SecretKey): String {
         val cipher = Cipher.getInstance(ALGO)

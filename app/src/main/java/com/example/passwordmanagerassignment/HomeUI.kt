@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.passwordmanagerassignment.modals.UserInfo
 import com.example.passwordmanagerassignment.ui.theme.SF_PRO_BOLD
 import com.example.passwordmanagerassignment.ui.theme.SF_PRO_HEAVY
 import com.example.passwordmanagerassignment.ui.theme.SF_PRO_MEDIUM
@@ -57,8 +59,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeUi(modifier: Modifier = Modifier) {
-
-    Column(
+    /*Column(
         modifier = modifier
             .fillMaxSize()
             .padding(vertical = 20.dp)
@@ -82,19 +83,23 @@ fun HomeUi(modifier: Modifier = Modifier) {
         )
 
 
-        val dummyList = (1..10).toList()
+        val dummyList = listOf(
+            UserInfo("Singh", "Example.com", "Singh"),
+            UserInfo("Singh", "Example.com", "Singh"),
+            UserInfo("Singh", "Example.com", "Singh"),
+        )
         LazyColumn {
             items(dummyList) {
-                UserInfoItem {
+                UserInfoItem(it.acName) {
 
                 }
             }
         }
 
 
-    }
+    }*/
 //    AddNewAccount()
-//    AccountDetails()
+    AccountDetails()
 }
 
 @Composable
@@ -137,10 +142,10 @@ fun UserInfoItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddNewAccount(
-    btnText: String = "Add New Account",
-    addNewAccountSheetState: SheetState,
-    dismissReq: () -> Unit,
-    addNewACListener: (acName: String, userName: String, passWord: String) -> Unit = { _, _, _ -> }
+    userInfo: UserInfo = UserInfo("", "", ""),
+    addNewAccountSheetState: SheetState = rememberModalBottomSheetState(),
+    dismissReq: () -> Unit = { },
+    addNewACListener: (acName: String, userName: String, passWord: String, isUpdate: Boolean) -> Unit = { _, _, _, _ -> }
 ) {
     val textFieldColors = TextFieldDefaults.textFieldColors(
         focusedIndicatorColor = Color.Transparent,
@@ -149,12 +154,15 @@ fun AddNewAccount(
         containerColor = Color.Transparent
     )
 
-    var accountName by remember { mutableStateOf("") }
-    var userName by remember { mutableStateOf("") }
-    var passWord by remember { mutableStateOf("") }
+    var accountName by remember { mutableStateOf(userInfo.acName) }
+    var userName by remember { mutableStateOf(userInfo.encryptedUserName) }
+    var passWord by remember { mutableStateOf(userInfo.encryptedPassword) }
 
     val userNameError = remember { mutableStateOf(false) }
     val passWordError = remember { mutableStateOf(false) }
+
+    val btnText = if (userInfo.acName != "") "Update this Account"
+    else "Add New Account"
 
     ModalBottomSheet(
         modifier = Modifier.background(color = Color.Transparent),
@@ -206,10 +214,10 @@ fun AddNewAccount(
             Button(
                 onClick = {
                     if (!userNameError.value && !passWordError.value) {
-                        addNewACListener.invoke(accountName, userName, passWord)
-                        CoroutineScope(Dispatchers.Main).launch {
-                            addNewAccountSheetState.hide()
-                        }
+                        addNewACListener.invoke(
+                            accountName, userName,
+                            passWord, userInfo.acName != ""
+                        )
                     } else Toast.makeText(
                         context,
                         "Pls check your credentials",
@@ -230,21 +238,17 @@ fun AddNewAccount(
 
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountDetails(
-    acName: String = "Facebook",
-    userName: String = "Example@gmail.com",
-    password: String = "********",
-    dismissReq: () -> Unit,
-    accountDetailsBtmSheetState: SheetState,
-    editListener: (acName: String) -> Unit = {},
-    deleteListener: (acName: String) -> Unit = {}
+    userInfo: UserInfo = UserInfo("Facebook", "Example@gmail.com", "********"),
+    dismissReq: () -> Unit = {},
+    accountDetailsBtmSheetState: SheetState = rememberModalBottomSheetState(),
+    editListener: () -> Unit = {},
+    deleteListener: () -> Unit = {}
 ) {
-
     ModalBottomSheet(
         sheetState = accountDetailsBtmSheetState,
         containerColor = colorResource(id = R.color.btm_dialog_background),
@@ -256,6 +260,11 @@ fun AccountDetails(
                 .wrapContentSize()
                 .padding(horizontal = 16.dp)
         ) {
+
+            var isPasswordShown by remember {
+                mutableStateOf(false)
+            }
+
             Text(
                 text = "Account Details", modifier = Modifier.padding(bottom = 20.dp),
                 style = TextStyle(
@@ -272,7 +281,7 @@ fun AccountDetails(
                 )
             )
             Text(
-                text = acName, modifier = Modifier.padding(top = 5.dp, bottom = 20.dp),
+                text = userInfo.acName, modifier = Modifier.padding(top = 5.dp, bottom = 20.dp),
                 style = TextStyle(
                     color = Color.Black, fontFamily = SF_PRO_BOLD, fontSize = 15.sp
                 )
@@ -285,7 +294,8 @@ fun AccountDetails(
                 )
             )
             Text(
-                text = userName, modifier = Modifier.padding(top = 5.dp, bottom = 20.dp),
+                text = userInfo.encryptedUserName,
+                modifier = Modifier.padding(top = 5.dp, bottom = 20.dp),
                 style = TextStyle(
                     color = Color.Black, fontFamily = SF_PRO_BOLD, fontSize = 15.sp
                 )
@@ -297,16 +307,38 @@ fun AccountDetails(
                     color = Color.Gray, fontFamily = SF_PRO_MEDIUM, fontSize = 9.sp
                 )
             )
-            Text(
-                text = password, modifier = Modifier.padding(top = 5.dp, bottom = 20.dp),
-                style = TextStyle(
-                    color = Color.Black, fontFamily = SF_PRO_BOLD, fontSize = 15.sp
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.Top
+            ) {
+                Text(
+                    text = if (isPasswordShown) userInfo.encryptedPassword else "* * * * * * *",
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 5.dp, bottom = 20.dp),
+                    style = TextStyle(
+                        color = Color.Black, fontFamily = SF_PRO_BOLD, fontSize = 15.sp
+                    )
                 )
-            )
+
+                Image(
+                    modifier = Modifier
+                        .padding(end = 25.dp)
+                        .clickable {
+                            isPasswordShown = !isPasswordShown
+                            delayTask(2000) {
+                                isPasswordShown = false
+                            }
+                        },
+                    painter = painterResource(id = R.drawable.show_pass),
+                    contentDescription = "Visible Password"
+                )
+            }
 
             Row {
                 Button(
-                    onClick = { editListener.invoke(acName) },
+                    onClick = { editListener.invoke() },
                     modifier = Modifier
                         .weight(1f)
                         .padding(vertical = 10.dp, horizontal = 8.dp)
@@ -320,7 +352,7 @@ fun AccountDetails(
                     )
                 }
                 Button(
-                    onClick = { deleteListener.invoke(acName) },
+                    onClick = { deleteListener.invoke() },
                     modifier = Modifier
                         .weight(1f)
                         .padding(vertical = 10.dp, horizontal = 8.dp)
@@ -336,6 +368,11 @@ fun AccountDetails(
             }
         }
     }
+
+    CoroutineScope(Dispatchers.Main).launch {
+        accountDetailsBtmSheetState.show()
+    }
+
 }
 
 

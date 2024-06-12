@@ -14,7 +14,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(private val repository: LocalDBRepo) : ViewModel() {
 
-    private val allUsers = mutableStateOf(emptyList<UserInfo>())
+    val userInfos = mutableStateOf(emptyList<UserInfo>())
 
 
     init {
@@ -25,28 +25,30 @@ class MainViewModel @Inject constructor(private val repository: LocalDBRepo) : V
     private fun getAllUserInfo() {
         viewModelScope.launch(Dispatchers.IO) {
             repository.getAllUserInfo().collect {
-                allUsers.value = it
+                userInfos.value = it
             }
         }
     }
 
-    private fun deleteUserData(acName: String) {
+    fun deleteUserData(acName: String) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.deleteUserInfo(acName)
         }
     }
 
-    private fun insertUserData(acName: String, userName: String, pass: String) {
+    fun insertUserData(acName: String, userName: String, pass: String) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.insertUserInfo(acName, userName, pass)
         }
     }
 
-    private fun updateUserData(acName: String, userName: String, pass: String) {
+    fun updateUserData(acName: String, userName: String, pass: String) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.updateUserInfo(acName, userName, pass)
         }
     }
+
+
 
 
 }

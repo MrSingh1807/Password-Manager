@@ -8,7 +8,7 @@ import javax.crypto.SecretKey
 
 object GenerateKeyUtils {
 
-    private const val KEY_ALIAS = "MyKeyAlias"
+    private const val KEY_ALIAS = "PasswordManager"
     private const val ANDROID_KEY_STORE = "AndroidKeyStore"
 
     fun generateSecretKey() {

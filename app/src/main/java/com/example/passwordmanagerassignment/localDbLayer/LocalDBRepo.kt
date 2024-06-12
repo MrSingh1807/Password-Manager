@@ -20,7 +20,6 @@ class LocalDBRepo @Inject constructor(private val accessDao: AccessUserInfo) {
             e.printStackTrace()
         }
     }
-
     fun insertUserInfo(acName: String, acUserName: String, acPassword: String) {
         try {
             val secretKey = GenerateKeyUtils.getSecretKey()
